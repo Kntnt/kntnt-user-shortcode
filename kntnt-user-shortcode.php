@@ -19,8 +19,11 @@ class Plugin {
 
     // Allowed arguments
     private static $defaults = [
-        'field'   => 'display_name',
-        'user_id' => false,
+        'field'       => 'display_name',
+        'where_slug'  => '',
+        'where_email' => '',
+        'where_login' => '',
+        'where_id'    => '',
     ];
 
     // Allowed fields
@@ -44,25 +47,49 @@ class Plugin {
 
     public function user_shortcode($atts) {
 
+        $output = '';
+
         $atts = $this->shortcode_atts(self::$defaults, $atts);
 
-        if ('posts_url' == $atts['field']) {
-            $user_id = $atts['user_id'] ? $atts['user_id'] : get_the_author_meta('ID');
-            $output = get_author_posts_url($user_id);
-        }
-        elseif ('posts_count' == $atts['field']) {
-            $user_id = $atts['user_id'] ? $atts['user_id'] : get_the_author_meta('ID');
-            $output = count_user_posts($user_id, 'post', true);
-        }
-        elseif (in_array($atts['field'], self::$fields)) {
-            $output = get_the_author_meta($atts['field'], $atts['user_id']);
-        }
-        else {
-            $output = '';
+        if ($user_id = $this->get_user_id($atts)) {
+
+            if ('posts_url' == $atts['field']) {
+                $output = get_author_posts_url($user_id);
+            }
+            elseif ('posts_count' == $atts['field']) {
+                $output = count_user_posts($user_id, 'post', true);
+            }
+            elseif (in_array($atts['field'], self::$fields)) {
+                $output = get_the_author_meta($atts['field'], $user_id);
+            }
+            elseif(is_callable('get_field')) {
+                $output = get_field($atts['field'], "user_{$user_id}");
+                $output = $output ? $output : '';
+            }
+
         }
 
         return $output;
 
+    }
+
+    private function get_user_id($atts) {
+        if ($atts['where_id']) {
+            $user = get_user_by('id', $atts['where_id']);
+        }
+        elseif ($atts['where_slug']) {
+            $user = get_user_by('slug', $atts['where_slug']);
+        }
+        elseif ($atts['where_email']) {
+            $user = get_user_by('email', $atts['where_email']);
+        }
+        elseif ($atts['where_login']) {
+            $user = get_user_by('login', $atts['where_login']);
+        }
+        else {
+            $user = get_user_by('id', get_the_author_meta('ID'));
+        }
+        return $user ? $user->ID : false;
     }
 
     // A more forgiving version of WP's shortcode_atts().
