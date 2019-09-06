@@ -3,8 +3,8 @@
 /**
  * @wordpress-plugin
  * Plugin Name:       Kntnt User Shortcode
- * Description:       Provides the shortcode [user field='…' user_id='…'] to display user information.
- * Version:           1.0.0
+ * Description:       Provides the shortcode [user field='…' where_XXX='…'], where XXX is slug, email, login or id, that displays the value of the provided field — which can be built-in (e.g. display_name, email and description) or an ACF-field — of the user matching the provided criteria.
+ * Version:           1.0.1
  * Author:            Thomas Barregren
  * Author URI:        https://www.kntnt.com/
  * License:           GPL-3.0+
